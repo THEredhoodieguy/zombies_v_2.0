@@ -29,6 +29,7 @@ class Game(object):
         pygame.init()
 
         sim = Simulator(num_humans, num_zombies, xbound, ybound, num_blocks)
+        sim.start_processes()
 
         width = xbound * 10
         height = ybound * 10
@@ -74,8 +75,9 @@ class Game(object):
 
             pygame.display.update()
 
+        sim.end_processes()
         pygame.quit()
 
 
 if __name__ == "__main__":
-    game = Game(100, 100, 4, 500, 1)
+    game = Game(100, 100, 4, 500, 30)

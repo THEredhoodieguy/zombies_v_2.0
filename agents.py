@@ -26,7 +26,7 @@ class Human(object):
         self.closest_zombie = None
 
     def get_dist(self, zombie):
-        return math.sqrt((zombie.x - self.x)**2 + (zombie.y - self.y)**2)
+        return (zombie.x - self.x)**2 + (zombie.y - self.y)**2
 
     def move(self, xbound, ybound):
         """"""
@@ -69,7 +69,7 @@ class Zombie(object):
         self.eat_dist = 3
 
     def get_dist(self, human):
-        return math.sqrt((human.x - self.x)**2 + (human.y - self.y)**2)
+        return (human.x - self.x)**2 + (human.y - self.y)**2
 
     def move(self, xbound, ybound):
         (xvel, yvel) = get_velocity(self.speed, self.direction)
@@ -111,7 +111,12 @@ class Simulator(object):
         #the following lists are used to put humans and zombies into the simulator at the end of turns
         self.new_humans = list()
         self.new_zombies = list()
-        self.pool = mp.Pool(processes=4)
+        
+    def start_processes(self):
+        self.pool = mp.Pool(processes=100)
+
+    def end_processes(self):
+        self.pool.close()
 
     def closest_zombie(self, human):
         #Check to make sure there are zombies at all
