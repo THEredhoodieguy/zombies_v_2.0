@@ -37,7 +37,7 @@ class Human(object):
         if(self.x + xvel > xbound or self.x + xvel < 0):
             new_x = self.x - xvel
         if(self.y + yvel > ybound or self.y + yvel < 0):
-            new_y = self.y - self.yvel
+            new_y = self.y - yvel
 
         self.x = new_x
         self.y = new_y
@@ -181,6 +181,11 @@ class Simulator(object):
                 for zombie in j:
                     self.pool.apply_async(self.closest_human, args=(zombie))
                     # self.closest_human(zombie)
+
+        for h in self.humans:
+            h.set_direction()
+        for z in self.zombies:
+            z.set_direction()
 
         random.shuffle(self.humans)
         random.shuffle(self.zombies)
