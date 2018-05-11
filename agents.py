@@ -15,7 +15,7 @@ def get_velocity(speed, direction):
 class Human(object):
     """
     Humans are the basic unit of the simulation.
-    They run from the nearest zombie 
+    They run from the nearest zombie
     """
 
     def __init__(self, x, y):
@@ -66,7 +66,7 @@ class Zombie(object):
         self.speed = 1.2
         self.direction = 0
         self.closest_human = None
-        self.eat_dist = 3
+        self.eat_dist = 2
 
     def get_dist(self, human):
         return (human.x - self.x)**2 + (human.y - self.y)**2
@@ -83,8 +83,10 @@ class Zombie(object):
         self.y = new_y
 
     def set_direction(self):
+        #if the zombie has a closest human, it will start moving towards them
         if(self.closest_human != None):
             self.direction = math.atan2(self.closest_human.y - self.y, self.closest_human.x - self.x)
+        #otherwise, just move in a random direction
         else:
             self.direction = random.random() * math.pi * 2
 
@@ -111,7 +113,7 @@ class Simulator(object):
         #the following lists are used to put humans and zombies into the simulator at the end of turns
         self.new_humans = list()
         self.new_zombies = list()
-        
+
     def start_processes(self):
         self.pool = mp.Pool(processes=100)
 
@@ -165,9 +167,11 @@ class Simulator(object):
         return self.zombies
 
     def update(self):
+        #we break up the map into blocks to make path finding less computationally intensive
         self.human_blocks = [[list() for j in range(self.num_blocks)] for i in range(self.num_blocks)]
         self.zombie_blocks = [[list() for j in range(self.num_blocks)] for i in range(self.num_blocks)]
 
+        #then we put the humans and zombies into blocks corresponding to their location
         for h in self.humans:
             self.human_blocks[int(h.x//self.block_unit_x) - 1][int(h.y//self.block_unit_y) - 1].append(h)
         for z in self.zombies:
@@ -179,13 +183,13 @@ class Simulator(object):
             for j in i:
                 for human in j:
                     self.pool.apply_async(self.closest_zombie, args=(human))
-                    # self.closest_zombie(human)
+                    self.closest_zombie(human)
 
         for i in self.zombie_blocks:
             for j in i:
                 for zombie in j:
                     self.pool.apply_async(self.closest_human, args=(zombie))
-                    # self.closest_human(zombie)
+                    self.closest_human(zombie)
 
         for h in self.humans:
             h.set_direction()
@@ -203,9 +207,11 @@ class Simulator(object):
         for z in self.zombies:
 
             if (z.closest_human != None) and (z.get_dist(z.closest_human) < z.eat_dist):
+                # print("Human exists and is in range of the zombie")
                 if(z.closest_human in self.humans):
                     self.new_zombies.append(z.eat())
                     self.humans.remove(z.closest_human)
+                    # print("Human eaten at: " + str(z.closest_human.x) + ", " + str(z.closest_human.y))
 
         for z in self.new_zombies:
             self.zombies.append(z)
